@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin the Wheel & Win Guaranteed Prizes!</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --accent: #ffe66d;
+            --dark: #292f36;
+            --light: #f7fff7;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--dark);
+            margin-bottom: 0;
+            font-size: 1.8rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        
+        .subheading {
+            text-align: center;
+            color: var(--dark);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 10px auto;
+        }
+        
+        .wheel {
+            width: 100%;
+            height: 100%;
+            transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            transform: rotate(0deg);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .wheel-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            z-index: 2;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        .wheel-button img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .spin-btn-container {
+            width: 200px;
+            height: 60px;
+            margin-top: 10px;
+        }
+        
+        .spin-btn {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .spin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .spin-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .spin-count {
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+        
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            display: none;
+        }
+        
+        .result h2 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .result p {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4);
+        }
+        
+        .claim-form {
+            display: none;
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        .claim-form h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .success-message h2 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .success-message p {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .wheel-button {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .spin-btn-container {
+                width: 180px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Spin the Wheel & Win Guaranteed Prizes!</h1>
+        <div class="subheading">Share link & get 2 free spins</div>
+        
+        <div class="wheel-container">
+            <img src="spin.png" alt="Prize Wheel" class="wheel" id="wheel">
+            <button class="wheel-button" id="wheelButton">
+                <img src="button.png" alt="Button">
+            </button>
+        </div>
+        
+        <div class="spin-btn-container">
+            <button class="spin-btn" id="spinBtn">SPIN NOW</button>
+            <div class="spin-count" id="spinCount">Spins left: 1</div>
+        </div>
+        
+        <div class="result" id="result">
+            <h2 id="prizeText">Congratulations! You won <span id="prizeName"></span></h2>
+            <p>Complete the form below to claim your prize</p>
+        </div>
+        
+        <div class="claim-form" id="claimForm">
+            <h3>Claim Your Prize</h3>
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label for="mobile">Mobile Number</label>
+                <input type="tel" id="mobile" placeholder="Enter your mobile number" required>
+            </div>
+            <button class="submit-btn" id="submitBtn">Submit Details</button>
+        </div>
+        
+        <div class="result" id="shareSection" style="display: none;">
+            <h2>Almost There!</h2>
+            <p>Share this page with 10 friends on WhatsApp to claim your prize and get 2 extra spins!</p>
+            <button class="whatsapp-btn" id="whatsappBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.515 5.392 1.521 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                Share on WhatsApp
+            </button>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            <h2>Your prize claim has been submitted successfully!</h2>
+            <p>Congratulations again! You will be contacted soon.</p>
+            <p>You've earned 2 extra spins for sharing!</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const wheel = document.getElementById('wheel');
+            const wheelButton = document.getElementById('wheelButton');
+            const spinBtn = document.getElementById('spinBtn');
+            const spinCount = document.getElementById('spinCount');
+            const result = document.getElementById('result');
+            const prizeName = document.getElementById('prizeName');
+            const claimForm = document.getElementById('claimForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const shareSection = document.getElementById('shareSection');
+            const whatsappBtn = document.getElementById('whatsappBtn');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Prize segments in order (must match your wheel image segments clockwise)
+            const prizes = [
+                "₹100 PayTM Cash",        // Segment 1 (top)
+                "Movie Ticket",           // Segment 2
+                "iPhone 14",               // Segment 3
+                "Samsung TV",              // Segment 4
+                "Smartwatch",              // Segment 5
+                "Bluetooth Speaker",      // Segment 6
+                "AirPods",                // Segment 7
+                "Better Luck Next Time",   // Segment 8 (will be skipped)
+                "Amazon Voucher ₹50",     // Segment 9
+                "Free Coffee Coupon",      // Segment 10
+                "20% Discount Voucher",    // Segment 11
+                "Surprise Gift Box"        // Segment 12
+            ];
+            
+            // Number of segments on the wheel
+            const segmentCount = prizes.length;
+            const anglePerSegment = 360 / segmentCount;
+            
+            // We'll skip "Better Luck Next Time" (index 7)
+            const skipIndex = 7;
+            
+            let isSpinning = false;
+            let currentRotation = 0;
+            let currentPrize = "";
+            let spinsLeft = 1;
+            
+            // Update spin count display
+            function updateSpinCount() {
+                spinCount.textContent = `Spins left: ${spinsLeft}`;
+            }
+            
+            // Helper function to get current rotation in degrees
+            function getRotationDegrees(obj) {
+                const matrix = window.getComputedStyle(obj).getPropertyValue('transform');
+                if (matrix !== 'none') {
+                    const values = matrix.split('(')[1].split(')')[0].split(',');
+                    const a = values[0];
+                    const b = values[1];
+                    const angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
+                    return angle < 0 ? angle + 360 : angle;
+                }
+                return 0;
+            }
+            
+            function spinWheel() {
+                if (isSpinning || spinsLeft <= 0) return;
+                
+                spinsLeft--;
+                updateSpinCount();
+                
+                isSpinning = true;
+                spinBtn.disabled = true;
+                wheelButton.disabled = true;
+                result.style.display = 'none';
+                claimForm.style.display = 'none';
+                shareSection.style.display = 'none';
+                successMessage.style.display = 'none';
+                
+                // Select a random prize (excluding "Better Luck Next Time")
+                let selectedIndex;
+                do {
+                    selectedIndex = Math.floor(Math.random() * segmentCount);
+                } while (selectedIndex === skipIndex);
+                
+                currentPrize = prizes[selectedIndex];
+                
+                // Calculate the angle for this prize (adjusted for wheel rotation)
+                const targetSegmentAngle = selectedIndex * anglePerSegment;
+                const fullRotations = 5 + Math.floor(Math.random() * 5); // 5-10 full spins
+                const targetRotation = currentRotation + (fullRotations * 360) + (360 - (targetSegmentAngle % 360)) + (anglePerSegment / 2);
+                
+                // Apply the rotation with easing
+                wheel.style.transform = `rotate(${targetRotation}deg)`;
+                currentRotation = targetRotation % 360;
+                
+                // After spin completes
+                setTimeout(function() {
+                    isSpinning = false;
+                    spinBtn.disabled = false;
+                    wheelButton.disabled = false;
+                    
+                    // Show the prize
+                    prizeName.textContent = currentPrize;
+                    result.style.display = 'block';
+                    claimForm.style.display = 'block';
+                    
+                    // Celebrate with confetti
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }, 5000); // Match this with CSS transition duration
+            }
+            
+            // Both buttons can trigger the spin
+            spinBtn.addEventListener('click', spinWheel);
+            wheelButton.addEventListener('click', spinWheel);
+            
+            submitBtn.addEventListener('click', function() {
+                const name = document.getElementById('name').value.trim();
+                const mobile = document.getElementById('mobile').value.trim();
+                
+                if (!name || !mobile) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                if (!/^\d{10}$/.test(mobile)) {
+                    alert('Please enter a valid 10-digit mobile number');
+                    return;
+                }
+                
+                // Hide form and show share section
+                claimForm.style.display = 'none';
+                result.style.display = 'none';
+                shareSection.style.display = 'block';
+            });
+            
+            whatsappBtn.addEventListener('click', function() {
+                const message = `I just won ${currentPrize} on this Spin & Win page! Try your luck too!`;
+                const url = window.location.href;
+                const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message + " " + url)}`;
+                
+                window.open(whatsappUrl, '_blank');
+                
+                // After sharing, show success message and add 2 more spins
+                setTimeout(function() {
+                    spinsLeft += 2;
+                    updateSpinCount();
+                    shareSection.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    
+                    // More celebration
+                    confetti({
+                        particleCount: 150,
+                        spread: 100,
+                        origin: { y: 0.6 }
+                    });
+                }, 1000);
+            });
+            
+            // Initialize spin count display
+            updateSpinCount();
+        });
+    </script>
+</body>
+</html>
